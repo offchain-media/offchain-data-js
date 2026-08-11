@@ -190,9 +190,16 @@ async function _renderCard(card, cfg, chartDiv) {
     if (full.live) data = full.data;
   };
 
-  // Overwrite Webflow static title text with catalog title (fixes mismatches like "BTC Dominance")
+  // Overwrite the Webflow static text with the catalog's. The shell was
+  // exported before two series were reassigned (a paywalled source forced
+  // circulating supply and miner revenue into the "dominance" and
+  // "lth-supply" slots), so its wording can describe the wrong metric.
+  // The subtitle needs this as much as the title: syncing only the title
+  // left "Circulating Supply" sitting above "Share of total crypto
+  // market cap".
   const titleEl = card.querySelector('h1, h2, h3, h4, h5, h6');
   if (titleEl && cfg.title) titleEl.textContent = cfg.title;
+  _setSubtitle(card, cfg);
 
   const readingEl = card.querySelector('.ocm-card-reading');
 
@@ -317,6 +324,26 @@ function _buildTopRow(card) {
   else card.insertBefore(row, card.firstChild);
 
   return { periodBar, headline, scaleBtn };
+}
+
+/**
+ * _setSubtitle(card, cfg)
+ * The shell ships two card markups: most carry the subtitle in
+ * `.ocm-card-sub` next to the heading, the rest put it straight inside
+ * `.ocm-card-meta` with the heading as a sibling. Only write to the
+ * latter when it holds no heading, so the standard markup's wrapper is
+ * never flattened.
+ */
+function _setSubtitle(card, cfg) {
+  if (!cfg.subtitle) return;
+
+  const sub = card.querySelector('.ocm-card-sub');
+  if (sub) { sub.textContent = cfg.subtitle; return; }
+
+  const meta = card.querySelector('.ocm-card-meta');
+  if (meta && !meta.querySelector('h1, h2, h3, h4, h5, h6')) {
+    meta.textContent = cfg.subtitle;
+  }
 }
 
 /**

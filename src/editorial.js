@@ -24,10 +24,13 @@ export const EDITORIAL = {
     importance: 'Volume validates price moves. High volume on a breakout signals conviction; low volume on a rally signals fragility.',
     update:     'Volume trending higher since May, consistent with the price breakout above $105k. A significant share is now concentrated on regulated venues — a centralization vector worth watching.',
   },
+  // Note: this id still reads "dominance" for URL stability, but the
+  // series is circulating supply. No free historical dominance source
+  // exists, so the chart was reassigned (see fetchCircSupply in data.js).
   'dominance': {
-    measures:   'Bitcoin\'s market cap as a percentage of the total cryptocurrency market.',
-    importance: 'A proxy for capital rotation. Rising dominance signals risk-off behavior within crypto — capital fleeing altcoins back to BTC.',
-    update:     'Dominance climbing to multi-year highs driven by ETF inflows that benefit BTC exclusively and general disillusionment with altcoin narratives post-memecoin fatigue.',
+    measures:   'The total number of bitcoin mined since the genesis block, out of the 21 million the protocol will ever create.',
+    importance: 'This is Bitcoin\'s monetary policy made visible. Issuance is fixed, public, and halves roughly every four years, so the curve flattens on a schedule nobody can renegotiate.',
+    update:     'Supply has passed 20 million coins, leaving under a million still to be issued, spread across the next century. What remains is now small enough that miner income depends more on fees than on new issuance.',
   },
   'hashrate': {
     measures:   'Estimated total computational power in exahashes per second dedicated to mining Bitcoin blocks.',
@@ -54,10 +57,13 @@ export const EDITORIAL = {
     importance: 'A rough proxy for network usage. Rising active addresses during price increases suggests organic demand rather than speculative leverage.',
     update:     'Active addresses crossed 1M/day in June — a threshold last seen during the 2021 bull market. Fewer exchange addresses, more self-custody and Lightning channel opens this time.',
   },
+  // Note: this id still reads "lth-supply" for URL stability, but the
+  // series is daily miner revenue. Coin Metrics paywalls SplyAct1yr on
+  // the community plan, so the chart was reassigned (see fetchMinerRevenue).
   'lth-supply': {
-    measures:   'Total Bitcoin held by addresses that haven\'t transacted in more than 155 days.',
-    importance: 'Measures conviction. When LTH supply rises during price increases, it signals accumulation — not distribution.',
-    update:     'Long-term holders now control over 75% of supply — the highest ratio ever recorded during an uptrend. Structurally different from 2021, where distribution began much earlier.',
+    measures:   'The bitcoin miners earn each day, combining the block subsidy with the transaction fees paid in that day\'s blocks.',
+    importance: 'This is the network\'s security budget, what it costs to keep mining honest. Every halving cuts the subsidy in half, so the long-run question is whether fee income grows enough to replace it.',
+    update:     'The subsidy has been 3.125 BTC per block since the 2024 halving, about 450 BTC a day when blocks arrive on schedule. Outside congestion peaks, fees still add only a thin layer on top.',
   },
   'exchange-balance': {
     measures:   'Aggregate Bitcoin balance held across known exchange wallets.',
