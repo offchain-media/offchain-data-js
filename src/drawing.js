@@ -70,21 +70,69 @@ export function sketchCircle(cx, cy, r) {
   return 'M' + pts.join(' L');
 }
 
+// ─── Value → axis position ───────────────────────────────────────
+/**
+ * makeScale(values, mode)
+ * Builds the vertical scale shared by the curve, the bars and the grid,
+ * so all three always agree on where a value sits.
+ *
+ * @param {number[]} values
+ * @param {'lin'|'log'} mode
+ * @returns {{
+ *   log: boolean, min: number, max: number, range: number,
+ *   toUnit: (v: number) => number,   // value  → 0..1 (0 = bottom)
+ *   fromUnit: (t: number) => number, // 0..1   → value
+ * }}
+ *
+ * Log mode needs strictly positive values, so it ignores zeros and
+ * negatives when computing the extent and clamps them to the smallest
+ * positive value when plotting. A series with no positive value at all
+ * silently stays linear — a log axis would be meaningless there.
+ */
+export function makeScale(values, mode = 'lin') {
+  const finite = values.filter(v => Number.isFinite(v));
+  const usable = finite.length ? finite : [0, 1];
+  const positives = usable.filter(v => v > 0);
+
+  if (mode !== 'log' || !positives.length) {
+    const min   = Math.min(...usable);
+    const max   = Math.max(...usable);
+    const range = max - min || 1;
+    return {
+      log: false, min, max, range,
+      toUnit:   v => (v - min) / range,
+      fromUnit: t => min + t * range,
+    };
+  }
+
+  const min = Math.min(...positives);
+  const max = Math.max(...positives);
+  const lo  = Math.log10(min);
+  // A flat series would give a zero-wide span: open it up by a decade
+  // so the curve lands mid-axis instead of dividing by zero.
+  const hi   = Math.log10(max);
+  const span = (hi - lo) || 1;
+
+  return {
+    log: true, min, max, range: max - min || 1,
+    toUnit:   v => (Math.log10(Math.max(v, min)) - lo) / span,
+    fromUnit: t => 10 ** (lo + t * span),
+  };
+}
+
 // ─── Data → SVG points ───────────────────────────────────────────
 /**
- * dataToPoints(data, PAD, CW, CH)
+ * dataToPoints(data, PAD, CW, CH, mode)
  * Converts normalized data array to SVG pixel coordinates.
- * @returns { points: Array<{x,y,d}>, min, max, range }
+ * @param {'lin'|'log'} mode  — vertical scale (default linear)
+ * @returns { points: Array<{x,y,d}>, min, max, range, scale }
  */
-export function dataToPoints(data, PAD, CW, CH) {
-  const vals  = data.map(d => d.v);
-  const min   = Math.min(...vals);
-  const max   = Math.max(...vals);
-  const range = max - min || 1;
+export function dataToPoints(data, PAD, CW, CH, mode = 'lin') {
+  const scale = makeScale(data.map(d => d.v), mode);
   const points = data.map((d, i) => ({
     x: PAD.left + (i / (data.length - 1)) * CW,
-    y: PAD.top  + CH - ((d.v - min) / range) * CH,
+    y: PAD.top  + CH - scale.toUnit(d.v) * CH,
     d,
   }));
-  return { points, min, max, range };
+  return { points, min: scale.min, max: scale.max, range: scale.range, scale };
 }

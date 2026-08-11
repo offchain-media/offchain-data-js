@@ -218,7 +218,31 @@ export function injectGalleryStyles() {
       background: rgba(247,147,26,0.12);
     }
 
-    .ocm-see-more { cursor: pointer; }
+    /* Scale toggle: identical pill to a period button (same size, same
+       padding, same weight). Only a wider gap sets it apart. */
+    .ocm-card-scale-btn { margin-left: 10px; }
+
+    /* The Webflow shell ships two card markups: on some cards "see more"
+       is an <a>, which the site's link styles render bold and underlined,
+       on others a <span>. Pin both to the same control so the grid reads
+       as one set. The tag selector is needed to outrank the link styles. */
+    .ocm-see-more,
+    .ocm-card a.ocm-see-more,
+    .ocm-card a.ocm-see-more:hover,
+    .ocm-card a.ocm-see-more:visited {
+      font-family: ${T.heading};
+      font-size: 11px;
+      /* Bold, never underlined: it has to carry the same visual weight as
+         the headline figure, otherwise the only action on the card
+         disappears into the background. */
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-bottom: 0;
+      color: ${T.accent};
+      cursor: pointer;
+    }
 
     /* Headings inside cards — covers WHTML-inserted cards without the
        Webflow ocm-card-title class (same values, so existing cards unaffected). */

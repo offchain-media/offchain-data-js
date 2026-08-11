@@ -161,13 +161,14 @@ function _drawFullRanking(container, data, cfg) {
 }
 
 /**
- * drawFullChart(container, data, cfg, period)
+ * drawFullChart(container, data, cfg, period, opts)
  * @param {HTMLElement} container
  * @param {Array<{ts,v}>} data     — full dataset
  * @param {Object}        cfg      — chart config from CATALOG
  * @param {string}        period   — "1D" | "1W" | "1M" | "3M" | "1Y" | "ALL"
+ * @param {{scale?: 'lin'|'log'}} [opts]  — vertical scale, default linear
  */
-export function drawFullChart(container, data, cfg, period) {
+export function drawFullChart(container, data, cfg, period, opts = {}) {
   container.innerHTML = '';
 
   const sliced = slicePeriod(data, period);
@@ -178,7 +179,7 @@ export function drawFullChart(container, data, cfg, period) {
     return;
   }
 
-  const { points, min, max, range } = dataToPoints(sliced, PAD, CW, CH);
+  const { points, scale } = dataToPoints(sliced, PAD, CW, CH, opts.scale || 'lin');
 
   const svg = svgEl('svg', { width: '100%', viewBox: `0 0 ${W} ${H}`, style: 'display:block' });
   const defs = svgEl('defs');
@@ -230,22 +231,27 @@ export function drawFullChart(container, data, cfg, period) {
   svg.appendChild(svgEl('rect', { width: W, height: H, fill: 'transparent' }));
 
   // ── Grid ───────────────────────────────────────────────────────
-  const _step = range / GRID_N;
-  const _fmtGrid = v => {
+  // Ticks are evenly spaced down the axis and read their value back
+  // through the scale, so a log axis labels its own (uneven) values.
+  // Precision follows the local gap between ticks rather than the
+  // overall range, which on a log axis varies from top to bottom.
+  const _fmtGrid = (v, step) => {
     const a = Math.abs(v);
-    if (a >= 1e9)  return `${(v / 1e9).toFixed(range / 1e9 < 5 ? 1 : 0)}B`;
-    if (a >= 1e6)  return `${(v / 1e6).toFixed(range / 1e6 < 5 ? 1 : 0)}M`;
-    if (a >= 1e3)  return `${(v / 1e3).toFixed(range / 1e3 < 5 ? 1 : 0)}k`;
-    if (_step >= 10)   return v.toFixed(0);
-    if (_step >= 1)    return v.toFixed(1);
-    if (_step >= 0.1)  return v.toFixed(2);
-    if (_step >= 0.01) return v.toFixed(3);
+    if (a >= 1e9)  return `${(v / 1e9).toFixed(step / 1e9 < 5 ? 1 : 0)}B`;
+    if (a >= 1e6)  return `${(v / 1e6).toFixed(step / 1e6 < 5 ? 1 : 0)}M`;
+    if (a >= 1e3)  return `${(v / 1e3).toFixed(step / 1e3 < 5 ? 1 : 0)}k`;
+    if (step >= 10)   return v.toFixed(0);
+    if (step >= 1)    return v.toFixed(1);
+    if (step >= 0.1)  return v.toFixed(2);
+    if (step >= 0.01) return v.toFixed(3);
     return v.toFixed(4);
   };
 
   for (let i = 0; i <= GRID_N; i++) {
-    const y   = PAD.top + (i / GRID_N) * CH;
-    const val = max - (i / GRID_N) * range;
+    const y    = PAD.top + (i / GRID_N) * CH;
+    const t    = 1 - i / GRID_N;
+    const val  = scale.fromUnit(t);
+    const step = Math.abs(scale.fromUnit(Math.min(t + 1 / GRID_N, 1)) - val) || 1;
 
     svg.appendChild(svgEl('line', {
       x1: PAD.left, y1: y, x2: PAD.left + CW, y2: y,
@@ -260,7 +266,7 @@ export function drawFullChart(container, data, cfg, period) {
       fill: 'rgba(128,128,128,0.65)',
       'font-style': 'italic',
     });
-    lbl.textContent = _fmtGrid(val);
+    lbl.textContent = _fmtGrid(val, step);
     svg.appendChild(lbl);
   }
 
@@ -289,7 +295,7 @@ export function drawFullChart(container, data, cfg, period) {
 
   // ── Chart body ─────────────────────────────────────────────────
   if (cfg.type === 'bar') {
-    _drawBars(svg, defs, sliced, min, range, cfg);
+    _drawBars(svg, defs, sliced, scale, cfg);
   } else {
     _drawLineCurve(svg, points, data, cfg, sliced);
   }
@@ -351,7 +357,7 @@ function _binData(data) {
 }
 
 // ── Private: bar chart ─────────────────────────────────────────────
-function _drawBars(svg, defs, sliced, min, range, cfg) {
+function _drawBars(svg, defs, sliced, scale, cfg) {
   const data = _binData(sliced);
   const gap  = data.length > 80 ? 1 : 3;
   const bw   = Math.max(1, (CW - gap * (data.length - 1)) / Math.max(data.length, 1));
@@ -359,7 +365,7 @@ function _drawBars(svg, defs, sliced, min, range, cfg) {
   const g    = svgEl('g', { filter: 'url(#ocm-rough)' });
 
   data.forEach((d, i) => {
-    const rawH   = ((d.v - min) / range) * CH;
+    const rawH   = scale.toUnit(d.v) * CH;
     const h      = Math.max(rawH, 2);           // min 2px so bars are always visible
     const x      = PAD.left + i * (bw + gap);
     const y      = PAD.top + CH - h;

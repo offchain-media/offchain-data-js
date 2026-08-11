@@ -11,7 +11,7 @@ import { CATALOG }                  from '../catalog.js';
 import { DESCRIPTIONS }             from '../descriptions.js';
 import { loadData, slicePeriod, fmtVal, fmtValBig } from '../data.js';
 import { drawFullChart }             from '../charts/fullchart.js';
-import { chartSkeleton }             from './skeleton.js';
+import { chartSkeleton, unavailablePanel } from './skeleton.js';
 import { T }                         from '../tokens.js';
 
 const PERIODS     = ['1W', '1M', '3M', '1Y', 'ALL'];
@@ -70,6 +70,7 @@ export async function renderEmbedChart(container, chartId) {
       .ocm-embed-pbtn { font-family:${T.heading}; font-size:11px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase; padding:4px 10px; border:1px solid rgba(128,128,128,0.25); border-radius:3px; cursor:pointer; color:${T.textAdaptiveMuted}; background:transparent; transition:all 0.15s; }
       .ocm-embed-pbtn:hover { border-color:${T.accent}; color:${T.accent}; }
       .ocm-embed-pbtn.active { border-color:${T.accent}; color:${T.accent}; background:rgba(247,147,26,0.08); }
+      .ocm-embed-sbtn { margin-left:8px; }
       .ocm-embed-chart { width:100%; aspect-ratio:680/380; }
       .ocm-embed-back { font-family:${T.heading}; font-size:12px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase; color:${T.textAdaptiveMuted}; text-decoration:none; display:inline-block; padding:0 0 14px; transition:color 0.15s; }
       .ocm-embed-back:hover { color:${T.accent}; }
@@ -126,13 +127,26 @@ export async function renderEmbedChart(container, chartId) {
 
   // ── Fetch data ─────────────────────────────────────────────────────
   let { data, live } = await loadData(cfg.api);
+  let logScale = false;
+
+  // Source unreachable: say so instead of publishing an invented series.
+  if (!live) {
+    reading.textContent = 'Data unavailable';
+    periodsEl.style.display = 'none';
+    chartEl.innerHTML = '';
+    chartEl.appendChild(unavailablePanel(cfg));
+    return;
+  }
 
   // Full history is only fetched when the user clicks ALL (lazy)
   let fullRequested = false;
   const ensureFullData = async () => {
     if (fullRequested) return;
     fullRequested = true;
-    ({ data, live } = await loadData(cfg.api, { full: true }));
+    // A failed "full" fetch must not swap live data for an invented
+    // series: keep the bounded window already on screen.
+    const full = await loadData(cfg.api, { full: true });
+    if (full.live) data = full.data;
   };
 
   // Headline: ranking → top value, time-series → latest value
@@ -141,12 +155,11 @@ export async function renderEmbedChart(container, chartId) {
     if (top) reading.textContent = fmtValBig(top.v, cfg.unit);
     periodsEl.style.display = 'none';
     drawFullChart(chartEl, data, cfg, 'ALL');
-    if (!live) reading.textContent += ' (demo)';
     return;
   }
 
   const last = data[data.length - 1];
-  if (last) reading.textContent = fmtValBig(last.v, cfg.unit) + (live ? '' : ' (demo)');
+  if (last) reading.textContent = fmtValBig(last.v, cfg.unit);
 
   // ── Period buttons ─────────────────────────────────────────────────
   const available = PERIODS.filter(p => _hasCoverage(data, p));
@@ -157,9 +170,10 @@ export async function renderEmbedChart(container, chartId) {
     const btn = document.createElement('button');
     btn.className = 'ocm-embed-pbtn' + (p === current ? ' active' : '');
     btn.textContent = p;
+    btn.dataset.period = p;
     btn.addEventListener('click', async () => {
       current = p;
-      periodsEl.querySelectorAll('.ocm-embed-pbtn').forEach(b =>
+      periodsEl.querySelectorAll('[data-period]').forEach(b =>
         b.classList.toggle('active', b === btn)
       );
       if (p === 'ALL') await ensureFullData();
@@ -168,8 +182,28 @@ export async function renderEmbedChart(container, chartId) {
     periodsEl.appendChild(btn);
   });
 
+  // ── Scale toggle ───────────────────────────────────────────────────
+  // Shows the scale you get by pressing it: LOG while linear, LIN once
+  // logarithmic. Useful well beyond price — hashrate and Lightning
+  // capacity are just as hard to read on a linear axis.
+  const scaleBtn = document.createElement('button');
+  scaleBtn.className = 'ocm-embed-pbtn ocm-embed-sbtn';
+  const _syncScale = () => {
+    scaleBtn.textContent = logScale ? 'LIN' : 'LOG';
+    scaleBtn.title = logScale ? 'Back to linear scale' : 'Switch to logarithmic scale';
+    scaleBtn.setAttribute('aria-pressed', String(logScale));
+    scaleBtn.classList.toggle('active', logScale);
+  };
+  _syncScale();
+  scaleBtn.addEventListener('click', () => {
+    logScale = !logScale;
+    _syncScale();
+    _render();
+  });
+  periodsEl.appendChild(scaleBtn);
+
   function _render() {
-    drawFullChart(chartEl, data, cfg, current);
+    drawFullChart(chartEl, data, cfg, current, { scale: logScale ? 'log' : 'lin' });
   }
   _render();
 }

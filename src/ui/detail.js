@@ -7,8 +7,42 @@ import { CATALOG } from '../catalog.js';
 import { EDITORIAL } from '../editorial.js';
 import { loadData, slicePeriod, fmtVal } from '../data.js';
 import { drawFullChart } from '../charts/fullchart.js';
-import { chartSkeleton } from './skeleton.js';
+import { chartSkeleton, unavailablePanel } from './skeleton.js';
 import { T } from '../tokens.js';
+
+// Log scale is a view setting, not a data setting: it survives the
+// period switches that re-run renderDetail, and resets per chart.
+let _logScale = false;
+let _logScaleFor = null;
+
+/**
+ * _ensureScaleBtn(el, chartId, onToggle)
+ * Adds the LOG/LIN toggle next to the static period buttons the Webflow
+ * shell ships with. Injected from JS so the shell markup stays untouched.
+ */
+function _ensureScaleBtn(el, onToggle) {
+  const bar = el.querySelector('.ocm-period-selector');
+  if (!bar) return null;
+
+  let btn = bar.querySelector('.ocm-scale-btn');
+  if (!btn) {
+    btn = document.createElement('a');
+    btn.className = 'ocm-period-btn ocm-scale-btn w-button';
+    btn.href = '#';
+    btn.style.marginLeft = '10px';
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      onToggle();
+    });
+    bar.appendChild(btn);
+  }
+
+  btn.textContent = _logScale ? 'LIN' : 'LOG';
+  btn.title = _logScale ? 'Back to linear scale' : 'Switch to logarithmic scale';
+  btn.setAttribute('aria-pressed', String(_logScale));
+  btn.classList.toggle('ocm-period-active', _logScale);
+  return btn;
+}
 
 /**
  * renderDetail(chartId, period)
@@ -38,9 +72,19 @@ export async function renderDetail(chartId, period) {
     `Last updated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`
   );
 
-  // Period buttons
-  el.querySelectorAll('.ocm-period-btn').forEach(btn => {
+  // Period buttons ([data-period] skips the injected scale toggle)
+  el.querySelectorAll('.ocm-period-selector [data-period]').forEach(btn => {
     btn.classList.toggle('ocm-period-active', btn.dataset.period === period);
+  });
+
+  // Scale toggle — reset when moving to a different chart
+  if (_logScaleFor !== chartId) {
+    _logScale = false;
+    _logScaleFor = chartId;
+  }
+  _ensureScaleBtn(el, () => {
+    _logScale = !_logScale;
+    renderDetail(chartId, period);
   });
 
   // Loading state
@@ -57,15 +101,32 @@ export async function renderDetail(chartId, period) {
   const { data, live } = await loadData(cfg.api, { full: period === 'ALL' });
   const sliced = slicePeriod(data, period);
   const last   = sliced[sliced.length - 1];
+  const readingEl = el.querySelector('.ocm-reading-value');
+
+  // Source unreachable: show that plainly instead of a mock series that
+  // no reader could distinguish from a real one.
+  if (!live) {
+    if (readingEl) readingEl.textContent = 'Data unavailable';
+    const bar = el.querySelector('.ocm-period-selector');
+    if (bar) bar.style.display = 'none';
+    if (chartEl) {
+      chartEl.innerHTML = '';
+      chartEl.appendChild(unavailablePanel(cfg));
+    }
+    _renderRelated(el, cfg);
+    return;
+  }
+
+  const bar = el.querySelector('.ocm-period-selector');
+  if (bar) bar.style.display = '';
 
   // Reading value
-  const readingEl = el.querySelector('.ocm-reading-value');
   if (readingEl && last) {
-    readingEl.textContent = fmtVal(last.v, cfg.unit) + (live ? '' : ' (demo data)');
+    readingEl.textContent = fmtVal(last.v, cfg.unit);
   }
 
   // Full chart
-  if (chartEl) drawFullChart(chartEl, data, cfg, period);
+  if (chartEl) drawFullChart(chartEl, data, cfg, period, { scale: _logScale ? 'log' : 'lin' });
 
   // Related charts
   _renderRelated(el, cfg);

@@ -52,7 +52,8 @@ async function showDetail(chartId, pushState = true) {
 
 // ── Period selector ───────────────────────────────────────────────
 function initPeriodBtns() {
-  document.querySelectorAll('.ocm-period-btn').forEach(btn => {
+  // [data-period] excludes the LOG/LIN toggle injected into the same bar
+  document.querySelectorAll('.ocm-period-selector [data-period]').forEach(btn => {
     btn.addEventListener('click', async () => {
       currentPeriod = btn.dataset.period;
       if (currentChartId) await renderDetail(currentChartId, currentPeriod);
