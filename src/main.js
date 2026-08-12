@@ -37,7 +37,9 @@ async function showDetail(chartId, pushState = true) {
   currentPeriod  = '1Y';
 
   if (galleryEl) galleryEl.style.display = 'none';
-  if (detailEl)  detailEl.style.display  = '';
+  // 'block', not '': the site stylesheet hides .ocm-detail-view by
+  // default, and an empty inline value falls back to that very 'none'.
+  if (detailEl)  detailEl.style.display  = 'block';
 
   // Update URL so the chart is directly shareable as ?chart=<id>
   if (pushState) {

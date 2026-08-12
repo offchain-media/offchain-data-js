@@ -30,7 +30,7 @@ export const EDITORIAL = {
   'dominance': {
     measures:   'The total number of bitcoin mined since the genesis block, out of the 21 million the protocol will ever create.',
     importance: 'This is Bitcoin\'s monetary policy made visible. Issuance is fixed, public, and halves roughly every four years, so the curve flattens on a schedule nobody can renegotiate.',
-    update:     'Supply has passed 20 million coins, leaving under a million still to be issued, spread across the next century. What remains is now small enough that miner income depends more on fees than on new issuance.',
+    update:     'With 20.07 million coins in circulation, more than 95% of all bitcoin that will ever exist has already been mined, and the remainder will trickle out over the next century. The next halving, expected around 2028, will make new supply a rounding error: from that point on, scarcity is no longer a projection but a measured fact.',
   },
   'hashrate': {
     measures:   'Estimated total computational power in exahashes per second dedicated to mining Bitcoin blocks.',
@@ -63,7 +63,7 @@ export const EDITORIAL = {
   'lth-supply': {
     measures:   'The bitcoin miners earn each day, combining the block subsidy with the transaction fees paid in that day\'s blocks.',
     importance: 'This is the network\'s security budget, what it costs to keep mining honest. Every halving cuts the subsidy in half, so the long-run question is whether fee income grows enough to replace it.',
-    update:     'The subsidy has been 3.125 BTC per block since the 2024 halving, about 450 BTC a day when blocks arrive on schedule. Outside congestion peaks, fees still add only a thin layer on top.',
+    update:     'Miners currently take home around 450 BTC a day, nearly all of it from the 3.125 BTC subsidy in place since the April 2024 halving. With fees stuck in the 5–8% range outside congestion spikes, the security budget still leans almost entirely on issuance, and every halving raises the stakes of that dependence.',
   },
   'exchange-balance': {
     measures:   'Aggregate Bitcoin balance held across known exchange wallets.',

@@ -67,11 +67,6 @@ export async function renderDetail(chartId, period) {
   _setText(el, '.ocm-importance-text', ed.importance || '');
   _setText(el, '.ocm-editorial-text',  ed.update     || '');
 
-  // Signature date
-  _setText(el, '.ocm-sig-date',
-    `Last updated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`
-  );
-
   // Period buttons ([data-period] skips the injected scale toggle)
   el.querySelectorAll('.ocm-period-selector [data-period]').forEach(btn => {
     btn.classList.toggle('ocm-period-active', btn.dataset.period === period);
@@ -145,7 +140,7 @@ function _renderRelated(el, cfg) {
       const div = document.createElement('div');
       div.style.cssText = 'padding:14px 16px;cursor:pointer;transition:background 0.15s';
       div.innerHTML = `
-        <h3 style="font-family:${T.heading};font-size:14px;font-weight:500;margin:0 0 4px">${c.title}</h3>
+        <h3 style="font-family:${T.heading};font-size:14px;font-weight:500;margin:0 0 4px;color:${T.textAdaptive}">${c.title}</h3>
         <p style="font-size:12px;color:${T.muted};margin:0;font-style:italic;font-family:${T.body}">${c.subtitle}</p>
       `;
       div.addEventListener('click', () => {
