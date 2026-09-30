@@ -7,6 +7,7 @@
  *   <div class="ocm-embed"></div>
  */
 
+import { UI } from '../i18n.js';
 import { CATALOG }                  from '../catalog.js';
 import { DESCRIPTIONS }             from '../descriptions.js';
 import { loadData, slicePeriod, fmtVal, fmtValBig } from '../data.js';
@@ -110,7 +111,7 @@ export async function renderEmbedChart(container, chartId) {
   // Source attribution is drawn inside the chart SVG by fullchart.js
   container.classList.add('ocm-embed');
   container.innerHTML = `
-    <a class="ocm-embed-back" href="/data">&larr; All charts</a>
+    <a class="ocm-embed-back" href="/data">${UI.allCharts.replace("←", "&larr;")}</a>
     <div class="ocm-embed-topbar">
       <span class="ocm-embed-headline">${cfg.title}</span>
       <span class="ocm-embed-reading">Loading…</span>
@@ -136,7 +137,7 @@ export async function renderEmbedChart(container, chartId) {
 
   // Source unreachable: say so instead of publishing an invented series.
   if (!live) {
-    reading.textContent = 'Data unavailable';
+    reading.textContent = UI.unavailable;
     periodsEl.style.display = 'none';
     chartEl.innerHTML = '';
     chartEl.appendChild(unavailablePanel(cfg));

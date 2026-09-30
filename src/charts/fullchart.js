@@ -5,6 +5,7 @@
  * Features: hover tooltip, crosshair, period-aware.
  */
 
+import { UI } from '../i18n.js';
 import { svgEl, smoothPath, sketchCircle, dataToPoints } from '../drawing.js';
 import { slicePeriod, fmtVal, fmtValTooltip, fmtDate } from '../data.js';
 import { T } from '../tokens.js';
@@ -38,12 +39,12 @@ function _fmtLabelValue(v) {
 }
 function _seriesLabel(data, cfg, period) {
   const last = data && data.length ? data[data.length - 1] : null;
-  const parts = [cfg.title, cfg.subtitle, period ? `period ${period}` : '', last ? `latest value ${_fmtLabelValue(last.v)}${cfg.unit ? ' ' + cfg.unit : ''}` : ''];
+  const parts = [cfg.title, cfg.subtitle, period ? `${UI.period} ${period}` : '', last ? `${UI.latest} ${_fmtLabelValue(last.v)}${cfg.unit ? ' ' + cfg.unit : ''}` : ''];
   return parts.filter(Boolean).join(', ');
 }
 function _rankingLabel(data, cfg) {
   const top = data && data.length ? data.slice().sort((a, b) => b.v - a.v)[0] : null;
-  const parts = [cfg.title, cfg.subtitle, data ? `ranking of ${data.length} entries` : '', top ? `first ${top.name || ''} with ${_fmtLabelValue(top.v)}` : ''];
+  const parts = [cfg.title, cfg.subtitle, data ? UI.ranking(data.length) : '', top ? UI.first(top.name || '', _fmtLabelValue(top.v)) : ''];
   return parts.filter(Boolean).join(', ');
 }
 
@@ -170,7 +171,7 @@ function _drawFullRanking(container, data, cfg) {
   svg.appendChild(svgEl('line', { x1: 0, y1: H - 16, x2: W, y2: H - 16, stroke: T.ink, 'stroke-width': '0.5', opacity: '0.3' }));
   const srcLink = svgEl('a', { href: SOURCE_URLS[cfg.source] || '#', target: '_blank', style: 'cursor:pointer; text-decoration:none' });
   const srcTxt  = svgEl('text', { x: PAD.left, y: H - 4, 'font-family': T.body, 'font-size': '11', 'font-style': 'italic', style: `fill:${T.muted}; transition:fill 0.15s` });
-  srcTxt.textContent = `Source: ${cfg.source}`;
+  srcTxt.textContent = UI.source + cfg.source;
   srcLink.addEventListener('mouseenter', () => { srcTxt.style.fill = T.accent; });
   srcLink.addEventListener('mouseleave', () => { srcTxt.style.fill = T.muted; });
   srcLink.appendChild(srcTxt);
@@ -342,7 +343,7 @@ export function drawFullChart(container, data, cfg, period, opts = {}) {
     'font-style': 'italic',
     style: `fill:${T.muted}; transition:fill 0.15s`,
   });
-  srcTxt.textContent = `Source: ${cfg.source}`;
+  srcTxt.textContent = UI.source + cfg.source;
   srcLink.addEventListener('mouseenter', () => { srcTxt.style.fill = T.accent; });
   srcLink.addEventListener('mouseleave', () => { srcTxt.style.fill = T.muted; });
   srcLink.appendChild(srcTxt);

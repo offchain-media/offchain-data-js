@@ -1,3 +1,4 @@
+import { UI } from '../i18n.js';
 /**
  * Sidebar navigation
  * One entry per ocm-category-section, in DOM order. Clicking an entry
@@ -34,7 +35,7 @@ export function initSidebar() {
   // One entry per section in page order; format "on-chain" → "On-Chain".
   sections.forEach((sec, idx) => {
     const cat   = sec.dataset.category;
-    const label = cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
+    const label = UI.categories[cat] || cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
     const item  = document.createElement('button');   // was a div: unreachable with the keyboard
     item.type = 'button';
     item.className = 'ocm-sidebar-item' + (idx === 0 ? ' ocm-sidebar-active' : '');

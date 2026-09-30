@@ -3,6 +3,7 @@
  * Handles: sidebar filtering, lazy-loaded interactive chart cards.
  */
 
+import { UI, chartPath, keepPageText } from '../i18n.js';
 import { CATALOG } from '../catalog.js';
 import { loadData, slicePeriod, fmtValBig } from '../data.js';
 import { drawFullChart } from '../charts/fullchart.js';
@@ -100,12 +101,12 @@ async function _initCards(onCardClick) {
     if (seeMore) {
       // The shell spells this "SEE MORE →" on some cards and "See more →"
       // on others; one label for the whole grid.
-      seeMore.textContent = 'See more →';
+      seeMore.textContent = UI.seeMore;
       seeMore.addEventListener('click', e => {
         e.stopPropagation();
         e.preventDefault();
         // Navigate to the chart's dedicated CMS page
-        window.location.href = `/charts/${chartId}`;
+        window.location.href = chartPath(chartId);
       });
     }
 
@@ -198,7 +199,7 @@ async function _renderCard(card, cfg, chartDiv) {
   // left "Circulating Supply" sitting above "Share of total crypto
   // market cap".
   const titleEl = card.querySelector('h1, h2, h3, h4, h5, h6');
-  if (titleEl && cfg.title) titleEl.textContent = cfg.title;
+  if (titleEl && cfg.title && !keepPageText(titleEl)) titleEl.textContent = cfg.title;
   _setSubtitle(card, cfg);
 
   const readingEl = card.querySelector('.ocm-card-reading');
@@ -216,7 +217,7 @@ async function _renderCard(card, cfg, chartDiv) {
     headline.textContent    = '';
     if (readingEl) {
       readingEl.style.display = '';
-      readingEl.textContent   = 'Data unavailable';
+      readingEl.textContent   = UI.unavailable;
     }
     return;
   }
@@ -341,11 +342,11 @@ function _setSubtitle(card, cfg) {
   if (!cfg.subtitle) return;
 
   const sub = card.querySelector('.ocm-card-sub');
-  if (sub) { sub.textContent = cfg.subtitle; return; }
+  if (sub) { if (!keepPageText(sub)) sub.textContent = cfg.subtitle; return; }
 
   const meta = card.querySelector('.ocm-card-meta');
   if (meta && !meta.querySelector('h1, h2, h3, h4, h5, h6')) {
-    meta.textContent = cfg.subtitle;
+    if (!keepPageText(meta)) meta.textContent = cfg.subtitle;
   }
 }
 

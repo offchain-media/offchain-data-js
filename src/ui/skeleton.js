@@ -4,6 +4,7 @@
  * Theme-neutral (grey alpha) so they work in both light and dark mode.
  */
 
+import { UI } from '../i18n.js';
 import { T } from '../tokens.js';
 
 let injected = false;
@@ -149,12 +150,12 @@ export function unavailablePanel(cfg, { reason = '' } = {}) {
 
   const title = document.createElement('span');
   title.className = 'ocm-unavail-title';
-  title.textContent = 'Data unavailable';
+  title.textContent = UI.unavailable;
 
   const note = document.createElement('span');
   note.className = 'ocm-unavail-note';
   note.textContent = reason
-    || `${cfg?.source || 'The source'} could not be reached. No figure is shown rather than an estimated one.`;
+    || UI.unreachable(cfg?.source);
 
   el.appendChild(title);
   el.appendChild(note);

@@ -3,6 +3,7 @@
  * Handles: full chart rendering, editorial content, period selector, related charts.
  */
 
+import { UI, chartPath, keepPageText } from '../i18n.js';
 import { CATALOG } from '../catalog.js';
 import { EDITORIAL } from '../editorial.js';
 import { loadData, slicePeriod, fmtVal } from '../data.js';
@@ -83,7 +84,8 @@ export async function renderDetail(chartId, period) {
   });
 
   // Loading state
-  _setText(el, '.ocm-reading-value', 'Loading…');
+  const readingLoading = el.querySelector('.ocm-reading-value');
+  if (readingLoading) readingLoading.textContent = UI.loading;
   const chartEl = el.querySelector('.ocm-detail-chart');
   if (chartEl) {
     chartEl.innerHTML = '';
@@ -101,7 +103,7 @@ export async function renderDetail(chartId, period) {
   // Source unreachable: show that plainly instead of a mock series that
   // no reader could distinguish from a real one.
   if (!live) {
-    if (readingEl) readingEl.textContent = 'Data unavailable';
+    if (readingEl) readingEl.textContent = UI.unavailable;
     const bar = el.querySelector('.ocm-period-selector');
     if (bar) bar.style.display = 'none';
     if (chartEl) {
@@ -140,7 +142,7 @@ function _renderRelated(el, cfg) {
       // A real link (was a div): keyboard users can reach it, and it still opens in place through the router.
       const div = document.createElement('a');
       div.className = 'ocm-related-link';
-      div.href = `/charts/${c.id}`;
+      div.href = chartPath(c.id);
       div.style.cssText = 'padding:14px 16px;cursor:pointer;transition:background 0.15s';
       div.innerHTML = `
         <h3 style="font-family:${T.heading};font-size:14px;font-weight:500;margin:0 0 4px;color:${T.textAdaptive}">${c.title}</h3>
@@ -160,7 +162,8 @@ function _renderRelated(el, cfg) {
 // ── Helpers ────────────────────────────────────────────────────────
 function _setText(root, selector, text) {
   const el = root.querySelector(selector);
-  if (el) el.textContent = text;
+  // The French pages already carry the translated title, subtitle and editorial texts: keep them.
+  if (el && !keepPageText(el)) el.textContent = text;
 }
 
 function _fmtCat(cat) {
