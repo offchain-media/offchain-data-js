@@ -7,7 +7,7 @@
  *   <div class="ocm-embed"></div>
  */
 
-import { UI } from '../i18n.js';
+import { UI, LANG } from '../i18n.js';
 import { CATALOG }                  from '../catalog.js';
 import { DESCRIPTIONS }             from '../descriptions.js';
 import { loadData, slicePeriod, fmtVal, fmtValBig } from '../data.js';
@@ -92,7 +92,7 @@ export async function renderEmbedChart(container, chartId) {
   }
 
   // ── SEO: page title + meta description (no em dashes) ─────────────
-  document.title = `${cfg.title} | Off-Chain Media`;
+  if (LANG !== 'fr') document.title = `${cfg.title} | Off-Chain Media`;
   const desc = DESCRIPTIONS[chartId];
   if (desc) {
     let meta = document.querySelector('meta[name="description"]');

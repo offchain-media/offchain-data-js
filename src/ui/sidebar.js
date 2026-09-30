@@ -23,7 +23,7 @@ export function initSidebar() {
 
   const nav = document.createElement('nav');
   nav.className = 'ocm-sidebar';
-  nav.setAttribute('aria-label', 'Chart categories');
+  nav.setAttribute('aria-label', UI.navCategories);
 
   const items = [];
   const setActive = cat => items.forEach(i => {

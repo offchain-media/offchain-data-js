@@ -10,13 +10,13 @@ const STRINGS = {
     seeMore: 'See more →', unavailable: 'Data unavailable', loading: 'Loading…', allCharts: '← All charts', source: 'Source: ',
     unreachable: (src) => `${src || 'The source'} could not be reached. No figure is shown rather than an estimated one.`,
     period: 'period', latest: 'latest value', ranking: (n) => `ranking of ${n} entries`, first: (name, v) => `first ${name} with ${v}`,
-    categories: {},
+    categories: {}, navCategories: 'Chart categories',
   },
   fr: {
     seeMore: 'Voir plus →', unavailable: 'Données indisponibles', loading: 'Chargement…', allCharts: '← Tous les graphiques', source: 'Source : ',
     unreachable: (src) => `${src || 'La source'} n'a pas répondu. Aucun chiffre n'est affiché plutôt qu'une estimation.`,
     period: 'période', latest: 'dernière valeur', ranking: (n) => `classement de ${n} entrées`, first: (name, v) => `premier ${name} avec ${v}`,
-    categories: { market: 'Marché', mining: 'Minage', 'on-chain': 'On-chain', lightning: 'Lightning', mempool: 'Mempool' },
+    categories: { market: 'Marché', mining: 'Minage', 'on-chain': 'On-chain', lightning: 'Lightning', mempool: 'Mempool' }, navCategories: 'Catégories de graphiques',
   },
 };
 export const UI = STRINGS[LANG];
