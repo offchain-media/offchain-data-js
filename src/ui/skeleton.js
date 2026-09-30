@@ -58,7 +58,7 @@ export function injectSkeletonStyles() {
       font-style: italic;
       font-size: 13px;
       letter-spacing: 0.02em;
-      color: rgba(128,128,128,0.75);
+      color: ${T.muted};
       pointer-events: none;
     }
 
@@ -96,7 +96,7 @@ export function injectSkeletonStyles() {
       font-style: italic;
       font-size: 12px;
       line-height: 1.5;
-      color: rgba(128,128,128,0.65);
+      color: ${T.muted};
       max-width: 34ch;
     }
 

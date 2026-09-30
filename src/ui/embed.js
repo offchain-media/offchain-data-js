@@ -53,7 +53,12 @@ function _styleArticlesSection() {
 export async function renderEmbedChart(container, chartId) {
   const cfg = CATALOG.find(c => c.id === chartId);
   if (!cfg) {
-    container.innerHTML = `<p style="font-family:${T.body};color:${T.muted};padding:20px">Chart not found: ${chartId}</p>`;
+    // Never echo the requested id back into the page: it comes from the URL (?chart=) and
+    // could carry HTML. A fixed message rendered as text closes that door.
+    const p = document.createElement('p');
+    p.style.cssText = `font-family:${T.body};color:${T.muted};padding:20px`;
+    p.textContent = 'Chart not found.';
+    container.replaceChildren(p);
     return;
   }
 

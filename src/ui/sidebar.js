@@ -22,20 +22,25 @@ export function initSidebar() {
 
   const nav = document.createElement('nav');
   nav.className = 'ocm-sidebar';
+  nav.setAttribute('aria-label', 'Chart categories');
 
   const items = [];
-  const setActive = cat => items.forEach(i =>
-    i.classList.toggle('ocm-sidebar-active', i.dataset.filter === cat)
-  );
+  const setActive = cat => items.forEach(i => {
+    const on = i.dataset.filter === cat;
+    i.classList.toggle('ocm-sidebar-active', on);
+    if (on) i.setAttribute('aria-current', 'true'); else i.removeAttribute('aria-current');
+  });
 
   // One entry per section in page order; format "on-chain" → "On-Chain".
   sections.forEach((sec, idx) => {
     const cat   = sec.dataset.category;
     const label = cat.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('-');
-    const item  = document.createElement('div');
+    const item  = document.createElement('button');   // was a div: unreachable with the keyboard
+    item.type = 'button';
     item.className = 'ocm-sidebar-item' + (idx === 0 ? ' ocm-sidebar-active' : '');
     item.textContent = label;
     item.dataset.filter = cat;
+    if (idx === 0) item.setAttribute('aria-current', 'true');
     item.addEventListener('click', () => {
       setActive(cat);
       _scrollToSection(sec, navbarH, nav);

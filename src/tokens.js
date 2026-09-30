@@ -7,7 +7,10 @@ export const T = {
   accent:  '#F7931A',               // Bitcoin orange — fixed, never substituted
   ink:     '#1a1a1a',               // near-black (light-mode fallback only)
   paper:   '#FAF7F1',               // warm paper background (light-mode fallback only)
-  muted:   'rgba(128,128,128,0.5)', // secondary text — neutral, works on both themes
+  // Secondary text. One solid grey per theme: 4.98:1 on paper, 6.46:1 on ink (WCAG AA).
+  // The old rgba(128,128,128,0.5) read at 1.8:1 in light mode. Use it in CSS or in a
+  // `style` attribute (light-dark() is CSS), never as a plain SVG fill attribute.
+  muted:   'light-dark(#6B6B6B, #A3A3A3)',
   grid:    'rgba(128,128,128,0.12)',// chart grid lines — neutral, works on both themes
   heading: "'Oswald', 'Arial Narrow', sans-serif",
   body:    "'Spectral', Georgia, serif",

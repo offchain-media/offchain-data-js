@@ -24,7 +24,8 @@ export function drawSparkline(container, data, type) {
   const toX = i => (i / (data.length - 1)) * W;
   const toY = v => H - ((v - min) / rng) * (H - 6) - 3;
 
-  const svg = svgEl('svg', { width: '100%', height: H, viewBox: `0 0 ${W} ${H}` });
+  // Decorative: the card already shows the title and the latest value as text, and the full chart page carries the labelled SVG.
+  const svg = svgEl('svg', { width: '100%', height: H, viewBox: `0 0 ${W} ${H}`, 'aria-hidden': 'true', focusable: 'false' });
 
   // Gradient for area fill
   const gradId = `sg-${container.dataset.chartId || Math.random()}`;

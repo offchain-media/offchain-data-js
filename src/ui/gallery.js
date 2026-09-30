@@ -274,7 +274,7 @@ async function _renderCard(card, cfg, chartDiv) {
     // Pick best starting period: 1Y preferred, fall back to 3M, then first available
     currentPeriod = PERIOD_PREF.find(p => availablePeriods.includes(p)) || availablePeriods[0] || DEFAULT_PERIOD;
     periodBtns().forEach(b =>
-      b.classList.toggle('ocm-card-period-active', b.dataset.period === currentPeriod)
+      { b.classList.toggle('ocm-card-period-active', b.dataset.period === currentPeriod); b.setAttribute('aria-pressed', String(b.dataset.period === currentPeriod)); }
     );
   }
 
@@ -282,7 +282,7 @@ async function _renderCard(card, cfg, chartDiv) {
     btn.addEventListener('click', async () => {
       currentPeriod = btn.dataset.period;
       periodBtns().forEach(b =>
-        b.classList.toggle('ocm-card-period-active', b === btn)
+        { b.classList.toggle('ocm-card-period-active', b === btn); b.setAttribute('aria-pressed', String(b === btn)); }
       );
       if (currentPeriod === 'ALL') await ensureFullData();
       render(currentPeriod);
@@ -300,16 +300,19 @@ function _buildTopRow(card) {
   const periodBar = document.createElement('div');
   periodBar.className = 'ocm-card-periods';
   CARD_PERIODS.forEach(p => {
-    const btn = document.createElement('span');
+    const btn = document.createElement('button');   // a real button: reachable with Tab, activated with Enter or Space
+    btn.type = 'button';
     btn.className   = 'ocm-card-period-btn' + (p === DEFAULT_PERIOD ? ' ocm-card-period-active' : '');
     btn.textContent = p;
     btn.dataset.period = p;
+    btn.setAttribute('aria-pressed', String(p === DEFAULT_PERIOD));
     periodBar.appendChild(btn);
   });
 
   // Scale toggle sits with the period buttons: same row, same look,
   // separated by a hair of margin so it reads as a different control.
-  const scaleBtn = document.createElement('span');
+  const scaleBtn = document.createElement('button');
+  scaleBtn.type = 'button';
   scaleBtn.className = 'ocm-card-period-btn ocm-card-scale-btn';
   _syncScaleBtn(scaleBtn, false);
   periodBar.appendChild(scaleBtn);

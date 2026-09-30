@@ -26,9 +26,30 @@ const SOURCE_URLS = {
   'CoinGecko':     'https://www.coingecko.com',
 };
 
+// ── Accessible names for the SVGs (WCAG 1.1.1): title, subtitle, period, latest value ──
+function _fmtLabelValue(v) {
+  if (v == null || !isFinite(v)) return '';
+  const a = Math.abs(v);
+  if (a >= 1e12) return (v / 1e12).toFixed(2) + ' T';
+  if (a >= 1e9)  return (v / 1e9).toFixed(2) + ' G';
+  if (a >= 1e6)  return (v / 1e6).toFixed(2) + ' M';
+  if (a >= 1e3)  return (v / 1e3).toFixed(1) + ' k';
+  return a >= 100 ? v.toFixed(0) : v.toFixed(2);
+}
+function _seriesLabel(data, cfg, period) {
+  const last = data && data.length ? data[data.length - 1] : null;
+  const parts = [cfg.title, cfg.subtitle, period ? `period ${period}` : '', last ? `latest value ${_fmtLabelValue(last.v)}${cfg.unit ? ' ' + cfg.unit : ''}` : ''];
+  return parts.filter(Boolean).join(', ');
+}
+function _rankingLabel(data, cfg) {
+  const top = data && data.length ? data.slice().sort((a, b) => b.v - a.v)[0] : null;
+  const parts = [cfg.title, cfg.subtitle, data ? `ranking of ${data.length} entries` : '', top ? `first ${top.name || ''} with ${_fmtLabelValue(top.v)}` : ''];
+  return parts.filter(Boolean).join(', ');
+}
+
 // ── Private: horizontal ranking chart (snapshot data with labels) ──
 function _drawFullRanking(container, data, cfg) {
-  const svg  = svgEl('svg', { width: '100%', viewBox: `0 0 ${W} ${H}`, style: 'display:block' });
+  const svg  = svgEl('svg', { width: '100%', viewBox: `0 0 ${W} ${H}`, style: 'display:block', role: 'img', 'aria-label': _rankingLabel(data, cfg) });
   const defs = svgEl('defs');
 
   const dropF  = svgEl('filter', { id: 'ocm-drop', x: '-20%', y: '-20%', width: '140%', height: '140%' });
@@ -68,8 +89,9 @@ function _drawFullRanking(container, data, cfg) {
     const cy      = PAD.top + i * itemH + itemH / 2;
     const isTop   = i === 0;
     const barClr  = isTop ? T.accent : T.line;
-    const lblFill = isTop ? T.accent : 'rgba(200,200,200,0.82)';
-    const valFill = isTop ? T.accent : 'rgba(128,128,128,0.65)';
+    // Theme-aware fills go through `style` (light-dark() is CSS, not a presentation attribute).
+    const lblStyle = `fill:${isTop ? T.accent : T.line}`;
+    const valStyle = `fill:${isTop ? T.accent : T.muted}`;
     const fullName = d.name || '—';
 
     // Per-row hover background (full width → highlights the entire row)
@@ -86,7 +108,7 @@ function _drawFullRanking(container, data, cfg) {
 
     // Label (truncated to 20 chars for rest state; tooltip shows full name)
     const label = fullName.length > 20 ? fullName.slice(0, 19) + '…' : fullName;
-    const lbl = svgEl('text', { x: String(LPAD - 8), y: String(cy + 4), 'text-anchor': 'end', 'font-family': T.body, 'font-size': '11', fill: lblFill });
+    const lbl = svgEl('text', { x: String(LPAD - 8), y: String(cy + 4), 'text-anchor': 'end', 'font-family': T.body, 'font-size': '11', style: lblStyle });
     lbl.textContent = label;
     svg.appendChild(lbl);
 
@@ -101,7 +123,7 @@ function _drawFullRanking(container, data, cfg) {
     svg.appendChild(barG);
 
     // Value label
-    const val = svgEl('text', { x: String(LPAD + barLen2 + 8), y: String(cy + 4), 'font-family': T.heading, 'font-size': '11', 'font-weight': '500', fill: valFill });
+    const val = svgEl('text', { x: String(LPAD + barLen2 + 8), y: String(cy + 4), 'font-family': T.heading, 'font-size': '11', 'font-weight': '500', style: valStyle });
     val.textContent = fmtValTooltip(d.v, cfg.unit);
     svg.appendChild(val);
 
@@ -147,10 +169,10 @@ function _drawFullRanking(container, data, cfg) {
   // Footer
   svg.appendChild(svgEl('line', { x1: 0, y1: H - 16, x2: W, y2: H - 16, stroke: T.ink, 'stroke-width': '0.5', opacity: '0.3' }));
   const srcLink = svgEl('a', { href: SOURCE_URLS[cfg.source] || '#', target: '_blank', style: 'cursor:pointer; text-decoration:none' });
-  const srcTxt  = svgEl('text', { x: PAD.left, y: H - 4, 'font-family': T.body, 'font-size': '11', fill: 'rgba(128,128,128,0.55)', 'font-style': 'italic', style: 'transition:fill 0.15s' });
+  const srcTxt  = svgEl('text', { x: PAD.left, y: H - 4, 'font-family': T.body, 'font-size': '11', 'font-style': 'italic', style: `fill:${T.muted}; transition:fill 0.15s` });
   srcTxt.textContent = `Source: ${cfg.source}`;
-  srcLink.addEventListener('mouseenter', () => srcTxt.setAttribute('fill', T.accent));
-  srcLink.addEventListener('mouseleave', () => srcTxt.setAttribute('fill', 'rgba(128,128,128,0.55)'));
+  srcLink.addEventListener('mouseenter', () => { srcTxt.style.fill = T.accent; });
+  srcLink.addEventListener('mouseleave', () => { srcTxt.style.fill = T.muted; });
   srcLink.appendChild(srcTxt);
   svg.appendChild(srcLink);
   const urlTxt = svgEl('text', { x: W - PAD.right, y: H - 4, 'text-anchor': 'end', 'font-family': T.heading, 'font-size': '10', fill: 'rgba(128,128,128,0.45)', 'letter-spacing': '0.1em' });
@@ -181,7 +203,7 @@ export function drawFullChart(container, data, cfg, period, opts = {}) {
 
   const { points, scale } = dataToPoints(sliced, PAD, CW, CH, opts.scale || 'lin');
 
-  const svg = svgEl('svg', { width: '100%', viewBox: `0 0 ${W} ${H}`, style: 'display:block' });
+  const svg = svgEl('svg', { width: '100%', viewBox: `0 0 ${W} ${H}`, style: 'display:block', role: 'img', 'aria-label': _seriesLabel(sliced, cfg, period) });
   const defs = svgEl('defs');
 
   // ── SVG filters ────────────────────────────────────────────────
@@ -263,7 +285,7 @@ export function drawFullChart(container, data, cfg, period, opts = {}) {
       'text-anchor': 'end',
       'font-family': T.body,
       'font-size': '12',
-      fill: 'rgba(128,128,128,0.65)',
+      style: `fill:${T.muted}`,
       'font-style': 'italic',
     });
     lbl.textContent = _fmtGrid(val, step);
@@ -317,12 +339,12 @@ export function drawFullChart(container, data, cfg, period, opts = {}) {
   const srcTxt = svgEl('text', {
     x: PAD.left, y: H - 4,
     'font-family': T.body, 'font-size': '11',
-    fill: 'rgba(128,128,128,0.55)', 'font-style': 'italic',
-    style: 'transition:fill 0.15s',
+    'font-style': 'italic',
+    style: `fill:${T.muted}; transition:fill 0.15s`,
   });
   srcTxt.textContent = `Source: ${cfg.source}`;
-  srcLink.addEventListener('mouseenter', () => srcTxt.setAttribute('fill', T.accent));
-  srcLink.addEventListener('mouseleave', () => srcTxt.setAttribute('fill', 'rgba(128,128,128,0.55)'));
+  srcLink.addEventListener('mouseenter', () => { srcTxt.style.fill = T.accent; });
+  srcLink.addEventListener('mouseleave', () => { srcTxt.style.fill = T.muted; });
   srcLink.appendChild(srcTxt);
   svg.appendChild(srcLink);
 

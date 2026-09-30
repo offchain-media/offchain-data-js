@@ -189,7 +189,7 @@ export function injectGalleryStyles() {
 
     .ocm-card-periods {
       display: flex;
-      gap: 4px;
+      gap: 8px;
       flex-shrink: 0;
     }
 
@@ -206,9 +206,16 @@ export function injectGalleryStyles() {
       font-family: ${T.heading};
       font-size: 10px;
       letter-spacing: 0.04em;
-      padding: 2px 8px;
+      /* Real buttons: reset the UA look, keep the pill. 24px minimum target (WCAG 2.5.8). */
+      display: inline-flex; align-items: center;
+      min-height: 24px;
+      padding: 4px 10px;
+      background: none;
+      border: 0;
+      font-weight: inherit;
+      line-height: 1;
       border-radius: 3px;
-      color: rgba(128,128,128,0.7);
+      color: ${T.muted};
       cursor: pointer;
       transition: background 0.15s, color 0.15s;
     }
@@ -263,6 +270,25 @@ export function injectGalleryStyles() {
       font-weight: 300;
       color: ${T.muted};
     }
+
+    /* Keyboard focus, same accent as the active state so it reads as one system. */
+    .ocm-card-period-btn:focus-visible,
+    .ocm-sidebar-item:focus-visible,
+    .ocm-related-link:focus-visible {
+      outline: 2px solid ${T.accent};
+      outline-offset: 2px;
+    }
+    /* The sidebar entries are buttons now (they were divs): reset the UA button look. */
+    .ocm-sidebar-item { background: none; font: inherit; cursor: pointer; }
+    .ocm-sidebar-item {
+      font-family: ${T.heading};
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .ocm-related-link { display: block; color: inherit; text-decoration: none; }
+    .ocm-related-link:hover { background: rgba(128,128,128,0.08); }
 
     @keyframes ocm-pending-pulse {
       0%, 100% { opacity: 1; }

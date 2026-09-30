@@ -137,13 +137,17 @@ function _renderRelated(el, cfg) {
     .filter(c => c.category === cfg.category && c.id !== cfg.id)
     .slice(0, 4)
     .forEach(c => {
-      const div = document.createElement('div');
+      // A real link (was a div): keyboard users can reach it, and it still opens in place through the router.
+      const div = document.createElement('a');
+      div.className = 'ocm-related-link';
+      div.href = `/charts/${c.id}`;
       div.style.cssText = 'padding:14px 16px;cursor:pointer;transition:background 0.15s';
       div.innerHTML = `
         <h3 style="font-family:${T.heading};font-size:14px;font-weight:500;margin:0 0 4px;color:${T.textAdaptive}">${c.title}</h3>
         <p style="font-size:12px;color:${T.muted};margin:0;font-style:italic;font-family:${T.body}">${c.subtitle}</p>
       `;
-      div.addEventListener('click', () => {
+      div.addEventListener('click', (e) => {
+        e.preventDefault();
         // Re-dispatch to main router via custom event
         document.dispatchEvent(new CustomEvent('ocm:openChart', { detail: c.id }));
       });
