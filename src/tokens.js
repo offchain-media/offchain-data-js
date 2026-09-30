@@ -4,7 +4,11 @@
  * Never hardcode colors or fonts elsewhere.
  */
 export const T = {
-  accent:  '#F7931A',               // Bitcoin orange — fixed, never substituted
+  accent:  '#F7931A',               // Bitcoin orange — fixed for lines, fills, borders and dark-theme text
+  // The same orange as TEXT on the light paper reads at 2.15:1 (4.5:1 needed). Text only, and only in
+  // light mode, uses a darker shade of the same hue (4.76:1 on paper); dark mode keeps #F7931A. Decided
+  // with Marius on 2026-09-30: one orange everywhere, darker on white when readability requires it.
+  accentText: 'light-dark(#A85A00, #F7931A)',
   ink:     '#1a1a1a',               // near-black (light-mode fallback only)
   paper:   '#FAF7F1',               // warm paper background (light-mode fallback only)
   // Secondary text. One solid grey per theme: 4.98:1 on paper, 6.46:1 on ink (WCAG AA).

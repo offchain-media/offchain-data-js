@@ -147,7 +147,7 @@ function _explorerLink() {
   content.innerHTML = `
     <p style="font-family:${T.heading};font-size:13px;font-weight:600;color:${T.textAdaptive};margin:0 0 4px;opacity:0.5;">Explorer</p>
     <p style="font-family:${T.heading};font-size:15px;font-weight:600;color:${T.textAdaptive};margin:0;">mempool</p>
-    <p style="font-family:${T.heading};font-size:15px;font-weight:600;color:${T.accent};margin:0;">.space →</p>
+    <p style="font-family:${T.heading};font-size:15px;font-weight:600;color:${T.accentText};margin:0;">.space →</p>
   `;
   wrap.appendChild(content);
 

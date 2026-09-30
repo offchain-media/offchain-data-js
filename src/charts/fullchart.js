@@ -90,8 +90,8 @@ function _drawFullRanking(container, data, cfg) {
     const isTop   = i === 0;
     const barClr  = isTop ? T.accent : T.line;
     // Theme-aware fills go through `style` (light-dark() is CSS, not a presentation attribute).
-    const lblStyle = `fill:${isTop ? T.accent : T.line}`;
-    const valStyle = `fill:${isTop ? T.accent : T.muted}`;
+    const lblStyle = `fill:${isTop ? T.accentText : T.line}`;
+    const valStyle = `fill:${isTop ? T.accentText : T.muted}`;
     const fullName = d.name || '—';
 
     // Per-row hover background (full width → highlights the entire row)

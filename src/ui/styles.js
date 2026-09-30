@@ -150,7 +150,7 @@ export function injectGalleryStyles() {
       background: light-dark(rgba(0,0,0,0.05), rgba(255,255,255,0.05));
     }
     .ocm-sidebar-item.ocm-sidebar-active {
-      color: ${T.accent};
+      color: ${T.accentText};
       border-color: ${T.accent};
       background: rgba(247,147,26,0.10);
     }
@@ -197,7 +197,7 @@ export function injectGalleryStyles() {
       font-family: ${T.heading};
       font-size: 22px;
       font-weight: 600;
-      color: ${T.accent};
+      color: ${T.accentText};
       letter-spacing: 0.01em;
       text-align: right;
       white-space: nowrap;
@@ -221,7 +221,7 @@ export function injectGalleryStyles() {
     }
     .ocm-card-period-btn:hover { color: ${T.textAdaptive}; }
     .ocm-card-period-btn.ocm-card-period-active {
-      color: ${T.accent};
+      color: ${T.accentText};
       background: rgba(247,147,26,0.12);
     }
 
@@ -247,7 +247,7 @@ export function injectGalleryStyles() {
       text-transform: uppercase;
       text-decoration: none;
       border-bottom: 0;
-      color: ${T.accent};
+      color: ${T.accentText};
       cursor: pointer;
     }
 

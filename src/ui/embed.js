@@ -70,15 +70,15 @@ export async function renderEmbedChart(container, chartId) {
       .ocm-embed { display:flex; flex-direction:column; gap:0; width:100%; max-width:720px; margin:0 auto; }
       .ocm-embed-topbar { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:0 0 12px; }
       .ocm-embed-headline { font-family:${T.heading}; font-size:clamp(22px,3vw,32px); font-weight:700; color:${T.textAdaptive}; letter-spacing:-0.5px; line-height:1; }
-      .ocm-embed-reading { font-family:${T.heading}; font-size:clamp(20px,2.4vw,28px); font-weight:700; color:${T.accent}; }
+      .ocm-embed-reading { font-family:${T.heading}; font-size:clamp(20px,2.4vw,28px); font-weight:700; color:${T.accentText}; }
       .ocm-embed-periods { display:flex; gap:6px; padding:0 0 10px; flex-wrap:wrap; }
       .ocm-embed-pbtn { font-family:${T.heading}; font-size:11px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase; padding:4px 10px; border:1px solid rgba(128,128,128,0.25); border-radius:3px; cursor:pointer; color:${T.textAdaptiveMuted}; background:transparent; transition:all 0.15s; }
-      .ocm-embed-pbtn:hover { border-color:${T.accent}; color:${T.accent}; }
-      .ocm-embed-pbtn.active { border-color:${T.accent}; color:${T.accent}; background:rgba(247,147,26,0.08); }
+      .ocm-embed-pbtn:hover { border-color:${T.accent}; color:${T.accentText}; }
+      .ocm-embed-pbtn.active { border-color:${T.accent}; color:${T.accentText}; background:rgba(247,147,26,0.08); }
       .ocm-embed-sbtn { margin-left:8px; }
       .ocm-embed-chart { width:100%; aspect-ratio:680/380; }
       .ocm-embed-back { font-family:${T.heading}; font-size:12px; font-weight:500; letter-spacing:0.5px; text-transform:uppercase; color:${T.textAdaptiveMuted}; text-decoration:none; display:inline-block; padding:0 0 14px; transition:color 0.15s; }
-      .ocm-embed-back:hover { color:${T.accent}; }
+      .ocm-embed-back:hover { color:${T.accentText}; }
       .ocm-embed-desc { font-family:${T.body}; font-size:15px; line-height:1.65; color:${T.textAdaptiveMuted}; max-width:720px; padding:20px 0 0; }
       .ocm-embed-desc h3 { font-family:${T.heading}; font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:${T.textAdaptive}; margin:0 0 8px; }
       .ocm-embed-desc p { margin:0; }
