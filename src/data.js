@@ -31,10 +31,7 @@ const COINGECKO_API_KEY = '';
 // supply, tx count).
 const COINMETRICS_BASE = 'https://community-api.coinmetrics.io/v4/timeseries/asset-metrics';
 
-// Current block subsidy (post-2024 halving). Stable until the next
-// halving around block 1,050,000 (~2028) — revisit this constant then.
-const BLOCK_SUBSIDY_BTC = 3.125;
-const BLOCKS_PER_DAY    = 144;
+const BLOCKS_PER_DAY = 144;
 
 // ─── Shared network helper ────────────────────────────────────────
 // All fetchers go through apiGet: caps concurrent requests so a page
@@ -359,22 +356,28 @@ async function fetchExchangeBalance(range) {
 
 // Derived, not fetched: daily miner revenue per TH/s, from data other
 // fetchers already pull (avoids a 4th network dependency for one chart).
+//
+// The revenue side uses mempool.space's average block reward (subsidy +
+// fees) rather than a hard-coded subsidy: a fixed 3.125 BTC understated
+// every day before the April 2024 halving by about half, and would have
+// gone wrong again at the next one. The reward series carries each era's
+// subsidy, past and future, on its own.
 async function fetchHashPrice(range) {
   const full = range === 'full';
-  const [{ data: fees }, { data: hash }, { data: price }] = await Promise.all([
-    loadData('fees',     { full }),
-    loadData('hashrate', { full }),
-    loadData('price',    { full }),
+  const [{ data: rewards }, { data: hash }, { data: price }] = await Promise.all([
+    loadData('blockrewards', { full }),
+    loadData('hashrate',     { full }),
+    loadData('price',        { full }),
   ]);
   const hashByDay  = new Map(hash.map(d => [Math.floor(d.ts / 86_400_000), d.v]));
   const priceByDay = new Map(price.map(d => [Math.floor(d.ts / 86_400_000), d.v]));
-  return fees
-    .map(({ ts, v: avgFeeBtc }) => {
+  return rewards
+    .map(({ ts, v: avgRewardBtc }) => {
       const day = Math.floor(ts / 86_400_000);
       const hashrate = hashByDay.get(day);
       const usd      = priceByDay.get(day);
       if (hashrate == null || usd == null) return null;
-      const dailyRevenueUsd = BLOCKS_PER_DAY * (BLOCK_SUBSIDY_BTC + avgFeeBtc) * usd;
+      const dailyRevenueUsd = BLOCKS_PER_DAY * avgRewardBtc * usd;
       return { ts, v: dailyRevenueUsd / (hashrate * 1e6) }; // EH/s → TH/s
     })
     .filter(Boolean);
