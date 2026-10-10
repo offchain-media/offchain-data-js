@@ -1,83 +1,22 @@
 /**
  * Off-Chain Media — Data Library
- * Entry point. Boots gallery, wires navigation between gallery ↔ detail.
+ * Entry point. Boots the /data gallery, or a single chart on /charts/<slug>.
  *
- * State machine:
- *   gallery  ← default, shows all chart cards
- *   detail   ← shown when a card is clicked, hidden on back button
+ * Each chart has its own page (/charts/<id>, /fr/charts/<id>) carrying the
+ * chart and its full editorial text in the page's language. The former
+ * in-page detail view (/data?chart=<id>) duplicated it with thinner,
+ * English-only texts: it is gone, and a ?chart= link now forwards to the
+ * chart page. The site's Worker already answers those links with a 301;
+ * the redirect below covers any request that still reaches the page.
  */
 
 import { initGallery }      from './ui/gallery.js';
-import { renderDetail }     from './ui/detail.js';
 import { renderEmbedChart } from './ui/embed.js';
 import { initBlockStrip }   from './ui/blockstrip.js';
 import { CATALOG }          from './catalog.js';
+import { chartPath }        from './i18n.js';
 
-// ── State ─────────────────────────────────────────────────────────
-let currentChartId = null;
-let currentPeriod  = '1Y';
-
-const galleryEl = document.querySelector('.ocm-gallery-view');
-const detailEl  = document.querySelector('.ocm-detail-view');
-
-// ── Navigation ────────────────────────────────────────────────────
-function showGallery() {
-  if (galleryEl) galleryEl.style.display = '';
-  if (detailEl)  detailEl.style.display  = 'none';
-  currentChartId = null;
-  // Clear ?chart= param without reloading
-  const url = new URL(window.location.href);
-  url.searchParams.delete('chart');
-  window.history.pushState({}, '', url);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-async function showDetail(chartId, pushState = true) {
-  currentChartId = chartId;
-  currentPeriod  = '1Y';
-
-  if (galleryEl) galleryEl.style.display = 'none';
-  // 'block', not '': the site stylesheet hides .ocm-detail-view by
-  // default, and an empty inline value falls back to that very 'none'.
-  if (detailEl)  detailEl.style.display  = 'block';
-
-  // Update URL so the chart is directly shareable as ?chart=<id>
-  if (pushState) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('chart', chartId);
-    window.history.pushState({ chartId }, '', url);
-  }
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  await renderDetail(chartId, currentPeriod);
-}
-
-// ── Period selector ───────────────────────────────────────────────
-function initPeriodBtns() {
-  // [data-period] excludes the LOG/LIN toggle injected into the same bar
-  document.querySelectorAll('.ocm-period-selector [data-period]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      currentPeriod = btn.dataset.period;
-      if (currentChartId) await renderDetail(currentChartId, currentPeriod);
-    });
-  });
-}
-
-// ── Back button ───────────────────────────────────────────────────
-function initBackBtn() {
-  const btn = document.querySelector('.ocm-back-btn');
-  if (btn) btn.addEventListener('click', showGallery);
-}
-
-// ── Custom event from related charts ─────────────────────────────
-document.addEventListener('ocm:openChart', e => showDetail(e.detail));
-
-// ── Browser back/forward ──────────────────────────────────────────
-window.addEventListener('popstate', () => {
-  const id = new URLSearchParams(window.location.search).get('chart');
-  if (id) showDetail(id, false);
-  else    showGallery();
-});
+const openChart = (chartId) => window.location.assign(chartPath(chartId));
 
 // ── Boot ──────────────────────────────────────────────────────────
 async function boot() {
@@ -93,15 +32,15 @@ async function boot() {
     return;
   }
 
-  initPeriodBtns();
-  initBackBtn();
-  initBlockStrip();
-  await initGallery(showDetail);
+  // Old shared links (/data?chart=<id>) land on the chart's own page.
+  const linkedChart = new URLSearchParams(window.location.search).get('chart');
+  if (linkedChart && CATALOG.some(c => c.id === linkedChart)) {
+    window.location.replace(chartPath(linkedChart));
+    return;
+  }
 
-  // If the page is loaded with ?chart=<id>, open that chart directly
-  // (works for shared links and social media previews)
-  const initialChart = new URLSearchParams(window.location.search).get('chart');
-  if (initialChart) await showDetail(initialChart, false);
+  initBlockStrip();
+  await initGallery(openChart);
 }
 
 if (document.readyState === 'loading') {

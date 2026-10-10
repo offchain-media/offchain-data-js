@@ -8,16 +8,14 @@ JavaScript bundle for the [Off-Chain Media](https://offchain.media) Bitcoin Data
 src/
 ├── main.js          ← Entry point. Boots gallery + wires navigation.
 ├── catalog.js       ← All 16 chart definitions (id, title, type, api, unit…)
-├── editorial.js     ← Editorial content per chart (measures, importance, monthly update)
 ├── tokens.js        ← Design tokens (colors, fonts) — never hardcode elsewhere
 ├── data.js          ← API fetchers + mock fallback + formatting helpers
 ├── drawing.js       ← Pure SVG helpers (smooth paths, jitter, sketch circle)
 ├── charts/
 │   ├── sparkline.js ← Mini chart for gallery cards (~48px tall)
-│   └── fullchart.js ← Full interactive chart for detail view (line/area/bar + tooltip)
+│   └── fullchart.js ← Full interactive chart for /charts/<id> pages (line/area/bar + tooltip)
 └── ui/
-    ├── gallery.js   ← Gallery view: card init, sparklines, filter tabs
-    └── detail.js    ← Detail view: full chart, editorial, period selector, related charts
+    └── gallery.js   ← Gallery view: card init, sparklines, filter tabs
 dist/
 └── offchain-data.bundle.js  ← Compiled bundle — this is what Webflow loads
 ```
@@ -43,7 +41,7 @@ npm run build
 ## Adding a new chart
 
 1. Add an entry to `src/catalog.js`
-2. Add editorial text to `src/editorial.js`
+2. Write its page text in offchain-site (`src/content/charts/{en,fr}/<id>.md`)
 3. If needed, add a fetcher to `src/data.js`
 4. Add a card with `data-chart-id="your-id"` to the Webflow page HTML
 5. Run `npm run build`
