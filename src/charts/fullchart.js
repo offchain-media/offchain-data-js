@@ -171,7 +171,7 @@ function _drawFullRanking(container, data, cfg) {
   svg.appendChild(svgEl('line', { x1: 0, y1: H - 16, x2: W, y2: H - 16, stroke: T.ink, 'stroke-width': '0.5', opacity: '0.3' }));
   const srcLink = svgEl('a', { href: SOURCE_URLS[cfg.source] || '#', target: '_blank', style: 'cursor:pointer; text-decoration:none' });
   const srcTxt  = svgEl('text', { x: PAD.left, y: H - 4, 'font-family': T.body, 'font-size': '11', 'font-style': 'italic', style: `fill:${T.muted}; transition:fill 0.15s` });
-  srcTxt.textContent = UI.source + cfg.source;
+  srcTxt.textContent = UI.source + (cfg.sourceLabel || cfg.source);
   srcLink.addEventListener('mouseenter', () => { srcTxt.style.fill = T.accent; });
   srcLink.addEventListener('mouseleave', () => { srcTxt.style.fill = T.muted; });
   srcLink.appendChild(srcTxt);
@@ -343,7 +343,7 @@ export function drawFullChart(container, data, cfg, period, opts = {}) {
     'font-style': 'italic',
     style: `fill:${T.muted}; transition:fill 0.15s`,
   });
-  srcTxt.textContent = UI.source + cfg.source;
+  srcTxt.textContent = UI.source + (cfg.sourceLabel || cfg.source);
   srcLink.addEventListener('mouseenter', () => { srcTxt.style.fill = T.accent; });
   srcLink.addEventListener('mouseleave', () => { srcTxt.style.fill = T.muted; });
   srcLink.appendChild(srcTxt);

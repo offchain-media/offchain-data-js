@@ -48,7 +48,7 @@ export const DESCRIPTIONS = {
   'mempool-size':
     "The mempool is the waiting room for unconfirmed transactions; this chart tracks its size in megabytes. A growing mempool signals congestion — demand for block space exceeding supply, pushing fees upward. An empty mempool means transactions confirm in the next block at minimal cost. It is the network's real-time load indicator.",
   'fee-rates':
-    "This chart shows current fee rates in satoshis per virtual byte, broken down by confirmation priority. It answers a practical question: what should you pay to confirm within the next block, within an hour, or eventually? Fee rates move with mempool congestion and are the clearest real-time signal of demand for block space.",
+    "This chart tracks the median fee rate, in satoshis per virtual byte, paid by transactions included in mined blocks. It shows what users actually paid, period by period, rather than a quote for the next block. Fee rates move with mempool congestion and are the clearest signal of demand for block space.",
   'tx-per-second':
     "Transactions per second measures on-chain throughput. Bitcoin's base layer processes only a handful of transactions per second by design — a deliberate trade-off favoring decentralization and verifiability over raw speed. Higher payment volumes move to layers built on top, like Lightning. Sustained changes in TPS reflect shifts in how block space is being used.",
   'block-weight':

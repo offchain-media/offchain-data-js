@@ -23,6 +23,8 @@ export const CATALOG = [
     api:      'price',
     unit:     '$',
     source:   'Coin Metrics',
+    // Daily history from Coin Metrics; the last 30 days, hourly, from CoinGecko (see fetchPrice).
+    sourceLabel: 'Coin Metrics, CoinGecko',
   },
   {
     id:       'market-cap',
@@ -234,8 +236,8 @@ export const CATALOG = [
   },
   {
     id:       'fee-rates',
-    title:    'Fee Rate Distribution',
-    subtitle: 'sat/vB by confirmation priority',
+    title:    'Median Fee Rate',
+    subtitle: 'sat/vB paid in mined blocks',
     category: 'mempool',
     type:     'bar',
     api:      'feerates',

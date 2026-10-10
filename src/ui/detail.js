@@ -67,6 +67,10 @@ export async function renderDetail(chartId, period) {
   _setText(el, '.ocm-measures-text',   ed.measures   || '');
   _setText(el, '.ocm-importance-text', ed.importance || '');
   _setText(el, '.ocm-editorial-text',  ed.update     || '');
+  // No editorial take for this chart: hide the block rather than show an empty heading.
+  el.querySelectorAll('.ocm-editorial-divider, .ocm-editorial-right').forEach(node => {
+    node.style.display = ed.update ? '' : 'none';
+  });
 
   // Period buttons ([data-period] skips the injected scale toggle)
   el.querySelectorAll('.ocm-period-selector [data-period]').forEach(btn => {
